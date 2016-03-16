@@ -109,8 +109,9 @@ describe('simple prefix queries, eg: [{prefix:"barcode",type:"prefix",query:"sku
 
   it('should match an attribute with an array value', function () {
     query(json, parse('categories:Music')).should.be.true;
-    query(json, parse('categories:Mus')).should.be.false;
+    query(json, parse('categories:Mus')).should.be.true;
     query(json, parse('categories:posters')).should.be.true;
+    query(json, parse('categories:woo')).should.be.false;
   });
 
 });

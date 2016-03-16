@@ -1,5 +1,9 @@
 var _ = require('lodash');
 
+var toType = function(obj){
+  return ({}).toString.call(obj).match(/\s([a-z|A-Z]+)/)[1].toLowerCase();
+};
+
 var defaults = {
 
 };
@@ -23,16 +27,18 @@ var match = {
     return bool.toString() === value;
   },
 
-  'array': function(array, value){
+  'array': function(array, value, options){
+    var self = this;
     return _.some(array, function(elem){
-      return elem.toLowerCase() === value;
+      var type = toType(elem);
+      return self[type](elem, value, options);
     });
   }
 };
 
 module.exports = function(haystack, needle, options){
   var opts = _.defaults({}, options, defaults);
-  var type = ({}).toString.call(haystack).match(/\s([a-z|A-Z]+)/)[1].toLowerCase();
+  var type = toType(haystack);
   if(match[type]){
     return match[type](haystack, needle, opts);
   }
