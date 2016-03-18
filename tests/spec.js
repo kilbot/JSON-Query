@@ -116,7 +116,7 @@ describe('simple prefix queries, eg: [{prefix:"barcode",type:"prefix",query:"sku
 
 });
 
-describe('simple piped queries, eg: [{type:"or",queries:[{query:"woo",type:"string"},{query:"foo",type:"string"}]}]', function(){
+describe('simple OR queries, eg: [{type:"or",queries:[{query:"woo",type:"string"},{query:"foo",type:"string"}]}]', function(){
 
   it('should match piped queries on title', function () {
     query(json, parse('woo|foo')).should.be.true;
@@ -144,6 +144,31 @@ describe('nested queries, eg: [{prefix:"address.postcode",type:"prefix",query:"9
     query(json, parse('90'), { fields: 'address.postcode' }).should.be.true;
     query(json, parse('123'), { fields: ['barcode', 'address.postcode'] }).should.be.true;
     query(json, parse('woo'), { fields: ['barcode', 'address.postcode'] }).should.be.false;
+  });
+
+});
+
+describe('simple AND queries, eg: [{type:"and",queries:[{query:"woo",type:"string"},{prefix:"address.postcode",type:"prefix",query:"90210"}]}]', function(){
+
+  it('should match AND queries', function () {
+    query(json, parse('(woo address.postcode:90210)')).should.be.true;
+    query(json, parse('(foo address.postcode:90210)')).should.be.false;
+  });
+
+});
+
+describe('simple range queries, eg: [{"type":"range","from":"10","to":"20"}]', function(){
+
+  it('should match range queries', function () {
+    query(json, parse('45-55'), {fields: 'id'}).should.be.true;
+    query(json, parse('55-65'), {fields: 'id'}).should.be.false;
+    query(json, parse('50-60'), {fields: 'id'}).should.be.true;
+    query(json, parse('40-50'), {fields: 'id'}).should.be.false; // as per _.inRange
+  });
+
+  it('should match prefixed range queries', function () {
+    query(json, parse('address.postcode:90000-99999')).should.be.true;
+    query(json, parse('address.postcode:80000-90000')).should.be.false;
   });
 
 });
