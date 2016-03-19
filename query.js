@@ -62,7 +62,7 @@ module.exports = function(json, filterArray, options) {
   var opts = _.defaults({}, options, defaults);
 
   if (!_.isArray(filterArray)) {
-    filterArray = [{type: 'string', query: filterArray}];
+    filterArray = [{type: 'string', query: filterArray.toString()}];
   }
 
   return _.every(filterArray, function (filter) {
