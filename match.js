@@ -27,17 +27,21 @@ var match = {
     return bool.toString() === value;
   },
 
-  'array': function(array, value, options){
+  'array': function(array, value){
     var self = this;
     return _.some(array, function(elem){
       var type = toType(elem);
-      return self[type](elem, value, options);
+      return self[type](elem, value, {exact: true});
     });
+  },
+
+  'undefined': function(){
+    // console.log(arguments);
   }
 };
 
 module.exports = function(haystack, needle, options){
-  var opts = _.defaults({}, options, defaults);
+  var opts = _.defaults({json: haystack}, options, defaults);
   var type = toType(haystack);
   if(match[type]){
     return match[type](haystack, needle, opts);

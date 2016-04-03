@@ -18,14 +18,14 @@ var json = {
     'Music',
     'Posters'
   ],
-  complex: [{
+  attributes: [{
     name: 'Color',
     slug: 'color',
     option: 'Black'
   },{
     name: 'Size',
     slug: 'size',
-    option: 'XL'
+    option: 'XXL'
   }],
   variable: [{
     name: 'Color',
@@ -109,7 +109,7 @@ describe('simple prefix queries, eg: [{prefix:"barcode",type:"prefix",query:"sku
 
   it('should match an attribute with an array value', function () {
     query(json, parse('categories:Music')).should.be.true;
-    query(json, parse('categories:Mus')).should.be.true;
+    query(json, parse('categories:Mus')).should.be.false;
     query(json, parse('categories:posters')).should.be.true;
     query(json, parse('categories:woo')).should.be.false;
   });
@@ -157,7 +157,7 @@ describe('simple AND queries, eg: [{type:"and",queries:[{query:"woo",type:"strin
 
 });
 
-describe('simple range queries, eg: [{"type":"range","from":"10","to":"20"}]', function(){
+describe('simple range queries, eg: [{type:"range",from:"10",to:"20"}]', function(){
 
   it('should match range queries', function () {
     query(json, parse('45-55'), {fields: 'id'}).should.be.true;
@@ -169,6 +169,35 @@ describe('simple range queries, eg: [{"type":"range","from":"10","to":"20"}]', f
   it('should match prefixed range queries', function () {
     query(json, parse('address.postcode:90000-99999')).should.be.true;
     query(json, parse('address.postcode:80000-90000')).should.be.false;
+  });
+
+});
+
+describe('simple AND queries, eg: [{type:"string",query:"woo"}, {type:"prefix",prefix:"description",query:"woo"}]', function(){
+
+  it('should string and prefix queries', function () {
+    query(json, parse('woo description:ipsum')).should.be.true;
+    query(json, parse('woo description:woo')).should.be.false;
+    query(json, parse('woo ipsum'), {fields: ['title', 'description']}).should.be.true;
+    query(json, parse('woo foo'), {fields: ['title', 'description']}).should.be.false;
+  });
+
+});
+
+describe('complex query, eg: [{prefix:"attributes.name",type:"prefix",query:"color"},{prefix:"attributes.option",type:"prefix",query:"black"}]', function(){
+
+  it('should match an array containing object', function () {
+    query(json, parse('attributes.name:color attributes.option:black')).should.be.true;
+    query(json, parse('attributes.name:color attributes.option:blue')).should.be.false;
+    query(json, parse('(attributes.name:color attributes.option:black)')).should.be.true;
+    query(json, parse('(attributes.name:color attributes.option:blue)')).should.be.false;
+  });
+
+  it('should match multiple array containing object', function () {
+    query(json, parse('attributes.name:color attributes.option:black attributes.name:size attributes.option:xxl')).should.be.true;
+    query(json, parse('attributes.name:color attributes.option:black attributes.name:size attributes.option:xl')).should.be.false;
+    query(json, parse('(attributes.name:color attributes.option:black) (attributes.name:size attributes.option:xxl)')).should.be.true;
+    query(json, parse('(attributes.name:color attributes.option:black) (attributes.name:size attributes.option:xl)')).should.be.false;
   });
 
 });

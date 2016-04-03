@@ -8,7 +8,15 @@ var defaults = {
 var pick = function(json, props){
   return _.chain(props)
     .map(function (key) {
-      return _.get(json, key); // allows nested get
+      var attr = _.get(json, key); // allows nested get
+
+      // special case, eg: attributes: [{name: 'Size'}, {name: 'Color'}]
+      if(attr === undefined){
+        var keys = key.split('.');
+        attr = _.chain(json).get(keys[0]).map(keys[1]).value();
+      }
+
+      return attr;
     })
     .value();
 };
@@ -65,6 +73,7 @@ module.exports = function(json, filterArray, options) {
     filterArray = [{type: 'string', query: filterArray.toString()}];
   }
 
+  // logical AND
   return _.every(filterArray, function (filter) {
     return methods[filter.type](json, filter, opts);
   });
